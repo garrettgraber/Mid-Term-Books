@@ -1,0 +1,17 @@
+
+
+
+
+ul.nav>li>a.header-button:hover {
+	background-color: red;
+}
+
+#main {
+	width: 100%;
+}
+
+.event {
+	border: 2px solid black;
+	margin-top: 10px;
+	margin-bottom: 10px; 
+}
