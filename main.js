@@ -96,6 +96,181 @@ var MasterBookObject = {Dune: DuneTimeline, GameThrones:GameThronesTimeline};
 var App = function() {
 
 	var that = this;
+	var femaleNextKin = ['greatAunt', 'aunt', 'cousin', 'niece', 'grandNiece'];
+	var femaleFamily = ['grandma', 'mother', 'wife', 'sister', 'daughter', 'grandDaughter'];
+	var maleFamily = ['grandpa', 'father', 'husband', 'brother', 'son', 'grandson'];
+	var maleNextKin = ['grandUncle', 'uncle', 'cousin', 'nephew', 'grandNephew'] ;
+	var otherRelations = ['servant','enemy','concubine'];
+
+	var grandArray = ['greatAunt', 'grandma', 'grandpa', 'grandUncle'];
+	var parentArray = ['aunt', 'mother', 'father', 'uncle'];
+	var siblingArray = ['sister', 'wife', 'husband', 'brother'];
+	var childArray = ['niece', 'daughter', 'son', 'nephew'];
+	var grandChildArray = ['grandNiece', 'grandDaughter', 'grandson', 'grandNephew'];
+	var randomEqualAgeArray = ['concubine', 'cousin', 'consort']
+
+
+	var femaleMembersArray = femaleNextKin.concat(femaleFamily);
+	femaleMembersArray.push('concubine');
+	var maleMembersArray = maleNextKin.concat(maleFamily);
+	maleMembersArray.push('consort');
+
+	femaleNextKin.reverse();
+	femaleFamily.reverse();
+	maleFamily.reverse();
+	maleNextKin.reverse();
+	otherRelations.reverse();
+
+	var masterRelationsArray = [femaleNextKin, femaleFamily, maleFamily, maleNextKin];
+	var generationsArray = [grandChildArray, childArray, siblingArray, parentArray, grandArray];
+
+	this.generateRelationObjectArray = function() {
+		var outputArray = [];
+		var currentRowValueModifier = Math.floor((generationsArray.length)/2);
+		for(var i=0; i < generationsArray.length; i++) {
+			var currentArray = generationsArray[ i ];
+			var currentColValueModifier = Math.floor((currentArray.length)/2);
+			var storeRowValue = i - currentRowValueModifier;;
+			if(generationsArray.length % 2 === 0 && storeRowValue >= 0) {
+				var storeRowValue = i - currentRowValueModifier + 1;
+			}
+			for(var j=0; j < currentArray.length; j++) {
+				var tempRelationObject = new relationObject(currentArray[j]);
+				var storeColValue = j - currentColValueModifier;
+				if(currentArray.length % 2 === 0 && storeColValue >= 0) {
+					var storeColValue = j - currentColValueModifier + 1;
+				}				
+				tempRelationObject.gridX = storeColValue;
+				tempRelationObject.gridY = storeRowValue;
+				outputArray.push(tempRelationObject);
+			}
+		}
+		return outputArray;
+	};
+
+	this.relationObject = function(relation) {
+		this.relation = relation;
+		this.gridX;
+		this.gridY;
+	};
+
+	this.searchRelationObjectArray = function(relationObjectArray, searchRelation) {
+
+		var foundItem = _.where(relationObjectArray, {relation: searchRelation} );
+		return foundItem[0];
+	};
+
+	this.searchGridPositionObjectArray = function(relationObjectArray, searchXValue, searchYValue) {
+
+		var foundItem = null;		
+		var foundItemArray = _.where(relationObjectArray, {gridX: searchXValue} );
+		if(foundItemArray.length > 0) {
+			var foundItem = _.where(foundItemArray, {gridY: searchYValue});
+			if(foundItem.length > 0) {
+				foundItem = foundItem[0];
+				return foundItem;
+			}
+			else {
+				console.log('item not found');
+				return foundItem;
+			}
+		}
+		else {
+			console.log('item not found');
+			return foundItem;
+		}
+	};
+
+	this.symetricShift = function(inArray, el) {
+		var arrLength = inArray.length;
+		var arrIndex = inArray.indexOf(el);
+		var arrNewPosition = (arrLength - arrIndex) - 1;
+		//return inArray[ arrNewPosition ];
+		return arrNewPosition;
+	};
+
+	this.establishRelationship = function(objectArray, relationStartObject, relationToStartObject) {
+	
+		var relationInitialObject = searchRelationObjectArray(objectArray, relationStartObject);
+		var searchObject = searchRelationObjectArray(objectArray, relationToStartObject);
+		var yAxisOffset = relationInitialObject.gridY + searchObject.gridY;
+		var xAxisInitial = relationInitialObject.gridX;
+
+		var xAxisSearch = searchObject.gridX;
+		var xAxisUse = xAxisSearch;
+		
+		console.log('Start Object:' + relationInitialObject.relation);
+		console.log('X value: ' + relationInitialObject.gridX);
+		console.log('Y value: ' + relationInitialObject.gridY);
+		console.log('Search Object:' + searchObject.relation);
+		console.log('X value: ' + searchObject.gridX);
+		console.log('Y value: ' + searchObject.gridY);
+
+		// if(Math.abs(relationInitialObject.gridY) === 1 || Math.abs(searchObject.gridY) === 1) {
+
+		// 	if(relationInitialObject.gridY < 0 && searchObject.gridY > 0 ) {
+		// 		yAxisOffset = yAxisOffset + 1;
+		// 	}
+
+		// 	if( relationInitialObject.gridY > 0 && searchObject.gridY < 0) {
+		// 		yAxisOffset = yAxisOffset - 1;
+		// 	}
+		// }
+
+
+		if( -(xAxisInitial/Math.abs(xAxisInitial)) === (xAxisSearch/Math.abs(xAxisSearch)) ) {
+			console.log('y-axis inflection');
+			var xAxisUse = -xAxisSearch;
+		}
+
+		console.log('X value used:' + xAxisUse);
+
+		var foundItem = searchGridPositionObjectArray(objectArray, xAxisUse, yAxisOffset);
+
+		return foundItem;
+	};
+
+	this.relationFinder = function(gender, key) {
+	
+		for(var i=0; i < generationsArray.length; i++) {
+		
+			var lateralArray = generationsArray[ i ];
+			var lateralIndex = lateralArray.indexOf(key);
+			
+			if(lateralIndex > -1) {
+				var generationIndex = generationsArray.indexOf(lateralArray);
+				break;
+			}	
+		}
+		
+		var tempGenerationArray = lateralArray.slice(0);
+		var newGenerationPosition = (generationsArray.length - generationIndex) - 1;
+		var searchArray = generationsArray[ newGenerationPosition ];
+		var newDistancePosition = lateralIndex;		
+		var locationArray = generationsArray[ newGenerationPosition ];
+		
+		if( (gender === 'male' && femaleMembersArray.indexOf(key) > -1) || (gender === 'female' && maleMembersArray.indexOf(key) > -1) ){
+			
+			var newDistancePosition = symetricShift(lateralArray, key)
+			
+			// console.log('lateralArray length: ');
+			// console.log(lateralArray.length);
+			// console.log('lateralIndex: ');
+			// console.log(lateralIndex);
+		}	
+		
+		var relationResult = locationArray[ newDistancePosition ];
+		// console.log('locationArray: ');
+		// console.log(locationArray);
+		// console.log('lateralArray: ');
+		// console.log(lateralArray);
+		// console.log(relationResult);
+		// console.log('newDistancePosition: ' + newDistancePosition);
+		//var outputName = locationArray[ newDistancePosition ];
+		
+		return locationArray[ newDistancePosition ];
+
+	};
 
 	this.TimeLine = function(bookEventArray) {
 
@@ -308,7 +483,14 @@ var App = function() {
 	return {
 		init: init,
 		Book: Book,
-		generateTimeline: generateTimeline, 
+		generateTimeline: generateTimeline,
+		relationFinder: relationFinder,
+		symetricShift: symetricShift,
+		generateRelationObjectArray: generateRelationObjectArray,
+		searchRelationObjectArray: searchRelationObjectArray,
+		searchGridPositionObjectArray: searchGridPositionObjectArray,
+		establishRelationship: establishRelationship,
+		generationsArray: generationsArray,
 	}
 
 }();
