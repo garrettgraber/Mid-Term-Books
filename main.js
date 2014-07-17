@@ -150,7 +150,10 @@ var App = function() {
 		this.relationList = storeList;
 
 		this.parseRelationList = function() {
-			this.relationConnectionDict = {};
+
+			if (this.relationConnectionDict === undefined) { 
+				this.relationConnectionDict = {};
+			}
 			var tempRelationList = this.relationList;
 
 			for(var i=0; i < this.relationList.length; i++) {
@@ -165,6 +168,7 @@ var App = function() {
 				this.relationConnectionDict[ tempName ] = tempRelation;
 
 			}
+			return this.relationConnectionDict;
 
 		}
 		
@@ -187,6 +191,54 @@ var App = function() {
 		}
 	};
 
+	var findSecondLevelRelationships = function(inObjectArray, relationObjectArray) {
+
+		console.log('\n\n\nStart searching second level relationships');
+
+		this.parseRelationList();
+		console.log(this.relationConnectionDict);
+		var relationConnectionDictLength = this.relationConnectionDict.length;
+
+		console.log('dictionary is good');
+
+		for(name in this.relationConnectionDict) {
+
+			console.log('in the for loop, first level');
+	
+			var foundPersonObject = searchObjectArray(inObjectArray, name, 'name');
+
+			console.log(foundPersonObject);
+
+			if(foundPersonObject !== undefined) {
+
+				console.log('found object');
+				var relationToYou = this.relationConnectionDict[ name ];
+
+				console.log('Name: ' + name);
+				console.log('Relation: ' + relationToYou);
+
+				var foundPersonObjectConnectionDict = foundPersonObject.parseRelationList();
+
+				
+				console.log('Relationship Dictionary: ' + foundPersonObjectConnectionDict);
+
+				for(nameFoundPerson in foundPersonObjectConnectionDict) {
+
+
+					var tempFoundRelation = foundPersonObjectConnectionDict[ nameFoundPerson ];
+					var resultRelation = returnPassThroughRelationObject(relationObjectArray, relationToYou, tempFoundRelation);
+
+					if(resultRelation !== undefined) {
+						this.createRelationObjectPairMethod(resultRelation.relation, nameFoundPerson);
+						console.log('\nfound pass through relationship, fuck yeah!');
+						console.log(nameFoundPerson + ' : ' + resultRelation);
+					}
+				}
+			}
+		}
+	};
+	
+	PersonObject.prototype.findSecondLevelRelationships = findSecondLevelRelationships;
 	PersonObject.prototype.applyRelationObject = applyRelationObject;
 	PersonObject.prototype.addRelation = addRelation;
 
@@ -286,46 +338,46 @@ var App = function() {
 		return arrNewPosition;
 	};
 
-	this.establishRelationship = function(objectArray, relationStartObject, relationToStartObject) {
+	// this.establishRelationship = function(objectArray, relationStartObject, relationToStartObject) {
 	
-		var relationInitialObject = searchRelationObjectArray(objectArray, relationStartObject);
-		var searchObject = searchRelationObjectArray(objectArray, relationToStartObject);
-		var yAxisOffset = relationInitialObject.gridY + searchObject.gridY;
-		var xAxisInitial = relationInitialObject.gridX;
+	// 	var relationInitialObject = searchRelationObjectArray(objectArray, relationStartObject);
+	// 	var searchObject = searchRelationObjectArray(objectArray, relationToStartObject);
+	// 	var yAxisOffset = relationInitialObject.gridY + searchObject.gridY;
+	// 	var xAxisInitial = relationInitialObject.gridX;
 
-		var xAxisSearch = searchObject.gridX;
-		var xAxisUse = xAxisSearch;
+	// 	var xAxisSearch = searchObject.gridX;
+	// 	var xAxisUse = xAxisSearch;
 		
-		console.log('Start Object:' + relationInitialObject.relation);
-		console.log('X value: ' + relationInitialObject.gridX);
-		console.log('Y value: ' + relationInitialObject.gridY);
-		console.log('Search Object:' + searchObject.relation);
-		console.log('X value: ' + searchObject.gridX);
-		console.log('Y value: ' + searchObject.gridY);
+	// 	console.log('Start Object:' + relationInitialObject.relation);
+	// 	console.log('X value: ' + relationInitialObject.gridX);
+	// 	console.log('Y value: ' + relationInitialObject.gridY);
+	// 	console.log('Search Object:' + searchObject.relation);
+	// 	console.log('X value: ' + searchObject.gridX);
+	// 	console.log('Y value: ' + searchObject.gridY);
 
-		// if(Math.abs(relationInitialObject.gridY) === 1 || Math.abs(searchObject.gridY) === 1) {
+	// 	// if(Math.abs(relationInitialObject.gridY) === 1 || Math.abs(searchObject.gridY) === 1) {
 
-		// 	if(relationInitialObject.gridY < 0 && searchObject.gridY > 0 ) {
-		// 		yAxisOffset = yAxisOffset + 1;
-		// 	}
+	// 	// 	if(relationInitialObject.gridY < 0 && searchObject.gridY > 0 ) {
+	// 	// 		yAxisOffset = yAxisOffset + 1;
+	// 	// 	}
 
-		// 	if( relationInitialObject.gridY > 0 && searchObject.gridY < 0) {
-		// 		yAxisOffset = yAxisOffset - 1;
-		// 	}
-		// }
+	// 	// 	if( relationInitialObject.gridY > 0 && searchObject.gridY < 0) {
+	// 	// 		yAxisOffset = yAxisOffset - 1;
+	// 	// 	}
+	// 	// }
 
 
-		if( -(xAxisInitial/Math.abs(xAxisInitial)) === (xAxisSearch/Math.abs(xAxisSearch)) ) {
-			console.log('y-axis inflection');
-			var xAxisUse = -xAxisInitial;
-		}
+	// 	if( -(xAxisInitial/Math.abs(xAxisInitial)) === (xAxisSearch/Math.abs(xAxisSearch)) ) {
+	// 		console.log('y-axis inflection');
+	// 		var xAxisUse = -xAxisInitial;
+	// 	}
 
-		console.log('X value used:' + xAxisUse);
+	// 	console.log('X value used:' + xAxisUse);
 
-		var foundItem = searchGridPositionObjectArray(objectArray, xAxisUse, yAxisOffset);
+	// 	var foundItem = searchGridPositionObjectArray(objectArray, xAxisUse, yAxisOffset);
 
-		return foundItem;
-	};
+	// 	return foundItem;
+	// };
 
 	this.findGender = function(familyRelation) {
 		var outIndexFemale = femaleMembersArray.indexOf(familyRelation);
@@ -346,10 +398,19 @@ var App = function() {
 	};
 
 	this.copyRelationObject = function(inObject) {
-		var tempRelationObject = new RelationObject('');
-		var result = $.extend( tempRelationObject, inObject);
+		console.log('copying relational object');
 		console.log(inObject);
-		inObject.name = '';
+
+		if(inObject === undefined) {
+			var result = new RelationObject('');
+		}
+		else {
+			console.log('relational object being copied is not undefined');
+			var tempRelationObject = new RelationObject('');
+			var result = $.extend( tempRelationObject, inObject);
+			console.log(inObject);
+			inObject.name = '';
+		}
 		return result;
 	};
 
@@ -365,6 +426,7 @@ var App = function() {
 	this.relationFinder = function(gender, key) {
 
 		console.log('gender: ' + gender);
+		console.log('key: ' + key);
 
 		if(gender === 'male' && key === 'wife') {
 			return 'husband';
@@ -399,26 +461,33 @@ var App = function() {
 			var newDistancePosition = lateralIndex;		
 			var locationArray = generationsArray[ newGenerationPosition ];
 			
-				if( (gender === 'male' && femaleMembersArray.indexOf(key) > -1) || (gender === 'female' && maleMembersArray.indexOf(key) > -1) ){
-					
-					var newDistancePosition = symetricShift(lateralArray, key)
-					
-					// console.log('lateralArray length: ');
-					// console.log(lateralArray.length);
-					// console.log('lateralIndex: ');
-					// console.log(lateralIndex);
-				}
-			
-			var relationResult = locationArray[ newDistancePosition ];
-			// console.log('locationArray: ');
-			// console.log(locationArray);
-			// console.log('lateralArray: ');
-			// console.log(lateralArray);
-			// console.log(relationResult);
-			// console.log('newDistancePosition: ' + newDistancePosition);
-			//var outputName = locationArray[ newDistancePosition ];
-			
-			return locationArray[ newDistancePosition ];
+			if( (gender === 'male' && femaleMembersArray.indexOf(key) > -1) || (gender === 'female' && maleMembersArray.indexOf(key) > -1) ){
+				
+				var newDistancePosition = symetricShift(lateralArray, key)
+				
+				// console.log('lateralArray length: ');
+				// console.log(lateralArray.length);
+				// console.log('lateralIndex: ');
+				// console.log(lateralIndex);
+			}
+
+			console.log('newDistancePosition: ' + newDistancePosition);
+
+			if(newDistancePosition > -1) {
+				var relationResult = locationArray[ newDistancePosition ];
+				// console.log('locationArray: ');
+				// console.log(locationArray);
+				// console.log('lateralArray: ');
+				// console.log(lateralArray);
+				// console.log(relationResult);
+				// console.log('newDistancePosition: ' + newDistancePosition);
+				//var outputName = locationArray[ newDistancePosition ];
+				
+				return locationArray[ newDistancePosition ];
+			}
+			else {
+				return key;
+			}
 		}
 		else {
 			return key;
@@ -461,6 +530,8 @@ var App = function() {
 		console.log(relationTuple);
 		var relationStoredObject = relationTuple[ 0 ];
 		var relationSentObject = relationTuple[ 1 ];
+		console.log('relationStoredObject: ' + relationStoredObject);
+		console.log('relationSentObject' + relationSentObject);
 		var relationStoreString = relationStoredObject.parseString();
 
 		this.applyRelationObject(relationStoredObject);
@@ -653,17 +724,22 @@ var App = function() {
 		
 			var foundObject = searchGridPositionObjectArray(relationObjectArray, xTarget, yValue);
 					
-			if(foundObject === null) {console.log('this might be the break point'); }
-					
-			if( (foundObject.relation === 'brother' || foundObject.relation === 'sister') && (targetRelation === 'nephew' || targetRelation === 'niece' || targetRelation === 'son' || targetRelation === 'daughter') ) {
-				var relationValue = 'cousin';
-				var foundObject = new RelationObject(relationValue);
-				
+			if(foundObject === null) {
+				foundObject = {};
+				console.log('this might be the break point'); 
 			}
-			
-			if( ( targetRelation === 'aunt' || targetRelation === 'uncle' || targetRelation === 'niece' || targetRelation === 'nephew') && (yValue === 0) ) {
-				var relationValue = 'sibling';
-				var foundObject = new RelationObject(relationValue);
+			else {
+					
+				if( (foundObject.relation === 'brother' || foundObject.relation === 'sister') && (targetRelation === 'nephew' || targetRelation === 'niece' || targetRelation === 'son' || targetRelation === 'daughter') ) {
+					var relationValue = 'cousin';
+					var foundObject = new RelationObject(relationValue);
+					
+				}
+				
+				if( ( targetRelation === 'aunt' || targetRelation === 'uncle' || targetRelation === 'niece' || targetRelation === 'nephew') && (yValue === 0) ) {
+					var relationValue = 'sibling';
+					var foundObject = new RelationObject(relationValue);
+				}
 			}
 			
 		}	
@@ -678,7 +754,7 @@ var App = function() {
 	this.returnPassThroughRelationObject = function(relationObjectArray, intermediateRelation, targetRelation) {
 
 		var key = 'relation';
-		console.log('foo4 has fired');
+		console.log('returnPassThroughRelationObject has fired');
 
 		var intermediateRelationObject = _.filter(relationObjectArray, function(obj) {return obj[key] === intermediateRelation});
 		var intermediateRelationObject = intermediateRelationObject[0];
@@ -691,14 +767,18 @@ var App = function() {
 		// var intermediateRelationObject = $.grep(relationObjectArray, function(el) {return el[key] === intermediateRelation} );
 		// var targetRelationObject = $.grep(relationObjectArray, function(el) {return el[key] === targetRelation} );
 		
-		console.log(intermediateRelationObject.relation);
-		console.log(targetRelationObject.relation);
-		
-		var intermediateRelationObject = copyRelationObject(intermediateRelationObject);
-		var targetRelationObject = copyRelationObject(targetRelationObject);
+		if(intermediateRelationObject !== undefined && targetRelationObject !== undefined) {
 
-		var resultRelationObject = findPassThroughRelationObjectByObjects(relationObjectArray, intermediateRelationObject, targetRelationObject);
-		return resultRelationObject;
+			console.log(intermediateRelationObject.relation);
+			console.log(targetRelationObject.relation);
+			
+			var intermediateRelationObject = copyRelationObject(intermediateRelationObject);
+			var targetRelationObject = copyRelationObject(targetRelationObject);
+
+			var resultRelationObject = findPassThroughRelationObjectByObjects(relationObjectArray, intermediateRelationObject, targetRelationObject);
+			return resultRelationObject;
+		}
+
 	};
 
 
@@ -877,19 +957,37 @@ var App = function() {
 		console.log('app started');
 
 		that.linkRelationObjectArray = generateLinkRelationObjectArray();
+		var relationObjectArray = generateRelationObjectArray();
 
 		var Person1Relations = [ 'Aria Atreides:sister', 'Lady Jessica:mother', 'Leto Atreides:father', 'Leto Atreides II:son','Baron Vladimir Harkonnen:grandpa', ' Ghanima:daughter']
 
 		that.masterPersonObjectArray = makeMasterPersonArray();
 
-		var numberLinksMasterPersonObjectArrayInital = countLinksPersonObjectArray(that.masterPersonObjectArray);
+		var numberLinksMasterPersonObjectArrayInitial = countLinksPersonObjectArray(that.masterPersonObjectArray);
 		
-		cycleConnectionsMasterPersonObjectArray(that.masterPersonObjectArray);		
 
-		var numberLinksMasterPersonObjectArrayEnd = countLinksPersonObjectArray(that.masterPersonObjectArray);
+		cycleConnectionsMasterPersonObjectArray(that.masterPersonObjectArray);
 		
-		console.log("Number of Links Before Cycle: " + numberLinksMasterPersonObjectArrayInital);
+		var numberLinksMasterPersonObjectArrayEnd = countLinksPersonObjectArray(that.masterPersonObjectArray);
+
+		console.log("Number of Links Before Cycle: " + numberLinksMasterPersonObjectArrayInitial);
 		console.log("Number of Links After Cycle: " + numberLinksMasterPersonObjectArrayEnd);
+
+
+		var testPersonObject = masterPersonObjectArray[0];
+		var testObjectArray = masterPersonObjectArray.slice(0, 5);
+		testPersonObject.findSecondLevelRelationships(masterPersonObjectArray, relationObjectArray);
+
+		var testPersonObject2 = masterPersonObjectArray[1];
+		testPersonObject2.findSecondLevelRelationships(masterPersonObjectArray, relationObjectArray);
+
+		var numberLinksMasterPersonObjectArraySecond = countLinksPersonObjectArray(that.masterPersonObjectArray);
+
+		console.log("Number of Links Before Cycle: " + numberLinksMasterPersonObjectArrayInitial);
+		console.log("Number of Links After Cycle: " + numberLinksMasterPersonObjectArrayEnd);
+
+		console.log("Number of links after pass through function has run through: " +  numberLinksMasterPersonObjectArraySecond);
+
 
 
 		// var Person1 = new PersonObject('Paul Atreides', 'male');
@@ -966,7 +1064,6 @@ var App = function() {
 		generateRelationObjectArray: generateRelationObjectArray,
 		searchRelationObjectArray: searchRelationObjectArray,
 		searchGridPositionObjectArray: searchGridPositionObjectArray,
-		establishRelationship: establishRelationship,
 		generationsArray: generationsArray,
 		PersonObject: PersonObject,
 		RelationObject: RelationObject,
