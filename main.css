@@ -4,6 +4,7 @@
 
 ul.nav>li>a.header-button:hover {
 	background-color: red;
+	border: 2px solid black;
 }
 
 #main {
@@ -14,4 +15,53 @@ ul.nav>li>a.header-button:hover {
 	border: 2px solid black;
 	margin-top: 10px;
 	margin-bottom: 10px; 
+}
+
+.node-point {
+
+	background-color: red;
+}
+
+#page {
+	height: 1000px;
+}
+
+.hell {
+
+	height: 1000px;
+/*	background-color: blue;
+*/
+
+}
+
+.node-character {
+
+/*	background-color: green; */
+	height: 150px;
+	width: 150px;
+/*	border-radius: 25px;
+*/
+
+}
+
+.character-zone {
+
+	height: 300px;
+}
+
+.popup {
+	display: none;
+	height: 400px;
+	width: 300px;
+	background-color: red;
+	z-index:10;
+	position: relative;
+	padding: 10px;
+	border: 5px solid black;
+	border-radius: 13px;
+}
+
+.visible {
+	display: visible;
+	z-index:10;
 }

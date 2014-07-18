@@ -2,11 +2,11 @@
 
 
 var DuneTimeline = {
-	"-108":"End of the Butlerian Jihad",
-	"-88":"Battle of Corrin. House Corrino establishes the Imperium.",
-	"0":"Foundation of the Spacing Guild",
-	"10191-10192":"House Atreides moves from Caladan to Arrakis. Is attacked by House Harkonnen. Leto I dies. Paul and Jessica go into the deep desert. Alia Atreides is born.",
-	"10193":"Battle of Arrakeen. House Harkonnen is annihilated. Glossu Rabban, Baron Harkonnen and then Feyd-Rautha die. Paul Atreides becomes Padishah Emperor. Shaddam IV and his younger daughters are exiled to Salusa Secundus.",
+  "-108":"End of the Butlerian Jihad",
+  "-88":"Battle of Corrin. House Corrino establishes the Imperium.",
+  "0":"Foundation of the Spacing Guild",
+  "10191-10192":"House Atreides moves from Caladan to Arrakis. Is attacked by House Harkonnen. Leto I dies. Paul and Jessica go into the deep desert. Alia Atreides is born.",
+  "10193":"Battle of Arrakeen. House Harkonnen is annihilated. Glossu Rabban, Baron Harkonnen and then Feyd-Rautha die. Paul Atreides becomes Padishah Emperor. Shaddam IV and his younger daughters are exiled to Salusa Secundus.",
 	"10208":"Signing of The Tupile Treaty, failed conspiracy to destroy House Atreides begins. Duncan-10208 (Ghola Hayt) is presented to Paul.",
 	"10209":"Chani dies after giving birth to Leto II and Ghanima Atreides. Paul goes into the deep desert. Alia Atreides assumes regency of the throne for the twins.",
 	"10219":"After a confrontation against his nephew Leto Atreides II, Alia Atreides dies, and he ascends the throne, becoming the God Emperor/Tyrant, and sets the Universe on his Golden Path.",
@@ -69,7 +69,7 @@ var GameThronesTimeline = {
 
 "dateTagPositive": "AC",
 "dateTagNegative": "BC"
-}
+};
 
 var MasterBookObject = {Dune: DuneTimeline, GameThrones:GameThronesTimeline};
 
@@ -116,20 +116,20 @@ var App = function() {
 	var randomEqualAgeArray = ['concubine', 'wife', 'husband', 'cousin', 'consort'];
 	var marriedDuo = ['wife', 'husband'];
 
-	var Person1Literal = {name:"Paul Atreides", gender:"male", relationList: [ 'Aria Atreides:sister', 'Lady Jessica:mother', 'Duke Leto Atreides:father', 'Leto Atreides II:son','Baron Vladimir Harkonnen:grandpa', 'Ghanima Atreides:daughter'] };
-	var Person7Literal = {name:'Ghanima Atreides', gender:'female', relationList: [ 'Aria Atreides:aunt', 'Stilgar:friend', 'Leto Atreides II:brother', 'Paul Atreides:father', 'Baron Vladimir Harkonnen:enemy'] };
+	var Person1Literal = {name:"Paul Atreides", gender:"male", relationList: [ 'Alia Atreides:sister', 'Lady Jessica Atreides:mother', 'Duke Leto Atreides:father', 'Leto Atreides II:son','Baron Vladimir Harkonnen:grandpa', 'Ghanima Atreides:daughter'] };
+	var Person7Literal = {name:'Ghanima Atreides', gender:'female', relationList: [ 'Alia Atreides:aunt', 'Stilgar:friend', 'Leto Atreides II:brother', 'Paul Atreides:father', 'Baron Vladimir Harkonnen:enemy', 'Lady Jessica Atreides:grandma'] };
 
-	var Person5Literal = {name:'Baron Vladimir Harkonnen', gender:'male', relationList: [ 'Lady Jessica:daughter', 'Stilgar:enemy', 'Duke Leto Atreides:enemy', 'Leto Atreides II:great grandson'] };
-	var Person6Literal = {name:'Leto Atreides II', gender:'male', relationList: [ 'Aria Atreides:aunt', 'Stilgar:friend', 'Baron Vladimir Harkonnen:enemy' ] };
+	var Person5Literal = {name:'Baron Vladimir Harkonnen', gender:'male', relationList: [ 'Lady Jessica Atreides:daughter', 'Stilgar:enemy', 'Duke Leto Atreides:enemy', 'Leto Atreides II:great grandson'] };
+	var Person6Literal = {name:'Leto Atreides II', gender:'male', relationList: [ 'Alia Atreides:aunt', 'Stilgar:friend', 'Baron Vladimir Harkonnen:enemy', 'Lady Jessica Atreides:grandma' ] };
 
-	var Person2Literal = {name:'Aria Atreides', gender:'female', relationList: ['Lady Jessica:mother', 'Stilgar:friend', 'Baron Vladimir Harkonnen:grandpa'] };
+	var Person2Literal = {name:'Alia Atreides', gender:'female', relationList: ['Lady Jessica Atreides:mother', 'Stilgar:friend', 'Baron Vladimir Harkonnen:grandpa'] };
 	var Person8Literal = {name:'Duke Leto Atreides', gender:'male', relationList: ['Leto Atreides II:grandson', 'Stilgar:friend', 'Ghanima Atreides:grand daughter'] };
 
-	var Person3Literal = {name:'Lady Jessica', gender:'female', relationList: ['Duke Leto Atreides:husband', 'Stilgar:friend'] };
+	var Person3Literal = {name:'Lady Jessica Atreides', gender:'female', relationList: ['Duke Leto Atreides:husband', 'Stilgar:friend'] };
 	
 	var Person4Literal = {name:'Stilgar', gender:'male', relationList: ['Paul Atreides:friend'] };
 		
-		this.personLiteralArray = [ Person1Literal, Person7Literal, Person5Literal, Person6Literal, Person2Literal, Person8Literal, Person3Literal, Person4Literal  ];
+	this.personLiteralArray = [ Person1Literal, Person7Literal, Person5Literal, Person6Literal, Person2Literal, Person8Literal, Person3Literal, Person4Literal  ];
 
 	var femaleMembersArray = femaleNextKin.concat(femaleFamily);
 	femaleMembersArray.push('concubine');
@@ -147,6 +147,7 @@ var App = function() {
 	this.relationIdenity = _.flatten(generationsArray);
 
 	this.passThroughCountTotal = 0;
+	this.clickStatus = false;
 
 
 	this.PersonObject = function(inLiteralObject) {
@@ -180,7 +181,36 @@ var App = function() {
 
 		}
 		
-	};
+		this.makePopup = function() {
+
+			var mainPopupJqueryObject = $('<div>');
+			mainPopupJqueryObject.addClass('popup');
+			var bodyPopupJqueryObject = $('<div>');
+			bodyPopupJqueryObject.addClass('popup-body');
+			var contentPopupJqueryObject = $('<div>');
+			contentPopupJqueryObject.addClass('popup-content');
+			var popupString = '<h2 class="popup-title">' + this.name + '</h2>';
+			var popupHeadingJqueryObject = $(popupString);   //don't add at end
+			contentPopupJqueryObject.append(popupHeadingJqueryObject);
+			
+			for(var key in this.relationConnectionDict) {
+				var paragraphJqueryObject = $('<p>');
+				var textString = key + ': ' + this.relationConnectionDict[ key ];
+				paragraphJqueryObject.text(textString);
+				console.log('text string: ' + textString);
+				console.log('paragraph object: ');
+				console.log(paragraphJqueryObject);
+				contentPopupJqueryObject.append(paragraphJqueryObject);
+			}
+
+			bodyPopupJqueryObject.append(contentPopupJqueryObject);
+			mainPopupJqueryObject.append(bodyPopupJqueryObject);
+			return mainPopupJqueryObject;
+		}	
+			
+		
+		// this.parseRelationList();
+};
 
 	var applyRelationObject = function(relationObject) {
 
@@ -350,47 +380,6 @@ var App = function() {
 		return arrNewPosition;
 	};
 
-	// this.establishRelationship = function(objectArray, relationStartObject, relationToStartObject) {
-	
-	// 	var relationInitialObject = searchRelationObjectArray(objectArray, relationStartObject);
-	// 	var searchObject = searchRelationObjectArray(objectArray, relationToStartObject);
-	// 	var yAxisOffset = relationInitialObject.gridY + searchObject.gridY;
-	// 	var xAxisInitial = relationInitialObject.gridX;
-
-	// 	var xAxisSearch = searchObject.gridX;
-	// 	var xAxisUse = xAxisSearch;
-		
-	// 	console.log('Start Object:' + relationInitialObject.relation);
-	// 	console.log('X value: ' + relationInitialObject.gridX);
-	// 	console.log('Y value: ' + relationInitialObject.gridY);
-	// 	console.log('Search Object:' + searchObject.relation);
-	// 	console.log('X value: ' + searchObject.gridX);
-	// 	console.log('Y value: ' + searchObject.gridY);
-
-	// 	// if(Math.abs(relationInitialObject.gridY) === 1 || Math.abs(searchObject.gridY) === 1) {
-
-	// 	// 	if(relationInitialObject.gridY < 0 && searchObject.gridY > 0 ) {
-	// 	// 		yAxisOffset = yAxisOffset + 1;
-	// 	// 	}
-
-	// 	// 	if( relationInitialObject.gridY > 0 && searchObject.gridY < 0) {
-	// 	// 		yAxisOffset = yAxisOffset - 1;
-	// 	// 	}
-	// 	// }
-
-
-	// 	if( -(xAxisInitial/Math.abs(xAxisInitial)) === (xAxisSearch/Math.abs(xAxisSearch)) ) {
-	// 		console.log('y-axis inflection');
-	// 		var xAxisUse = -xAxisInitial;
-	// 	}
-
-	// 	console.log('X value used:' + xAxisUse);
-
-	// 	var foundItem = searchGridPositionObjectArray(objectArray, xAxisUse, yAxisOffset);
-
-	// 	return foundItem;
-	// };
-
 	this.findGender = function(familyRelation) {
 		var outIndexFemale = femaleMembersArray.indexOf(familyRelation);
 		var outIndexMale = maleMembersArray.indexOf(familyRelation);
@@ -428,7 +417,6 @@ var App = function() {
 		var result = $.extend( tempRelationObject, inPersonObject);
 		return result;
 	};
-
 
 	this.relationFinder = function(gender, key) {
 
@@ -494,7 +482,6 @@ var App = function() {
 		}
 
 	};
-
 
 	this.createRelationObjectPair = function(tempString, tempStringName, name, gender) {
 	
@@ -602,7 +589,7 @@ var App = function() {
 	};
 
 	this.countLinksPersonObjectArray = function(inArray) {
-		var totalCount = 0
+		var totalCount = 0;
 		for(var i=0; i < inArray.length; i++) {
 			var tempPersonObject = inArray[ i ];
 			var linkCount = tempPersonObject.relationList.length;
@@ -610,8 +597,6 @@ var App = function() {
 		}
 		return totalCount;
 	};
-
-
 
 	this.findPassThroughRelationObjectByObjects = function(relationObjectArray, firstLevelRelationObject, secondLevelRelationObject) {
 
@@ -664,8 +649,6 @@ var App = function() {
 		return relationObjectTransformGrid(relationObjectArray, xTarget, yTarget, genderStart, genderTarget, secondLevelRelation);
 
 	};
-
-
 
 	this.returnRelationObjectGridLocation = function(relationObject) {
 
@@ -778,7 +761,6 @@ var App = function() {
 
 	};
 
-
 	this.returnPassThroughRelationObject = function(relationObjectArray, intermediateRelation, targetRelation) {
 
 		var key = 'relation';
@@ -799,6 +781,14 @@ var App = function() {
 
 	};
 
+	this.replaceCharacters = function(inString, beginCharacter, endCharacter) {
+		var outString = inString;
+		var indexValue = inString.indexOf(beginCharacter);
+		if(indexValue > -1) {
+			var outString = inString.split(beginCharacter).join(endCharacter);
+		}
+		return outString;
+	};
 
 
 
@@ -818,7 +808,8 @@ var App = function() {
 	this.Book = function(name, timelineObject) {
 		var self = this;
 		this.name = name;
-		this.timelineRawObject = timelineObject;
+		this.timelineRawObject = timelineObject;		
+		this.characterObjectArray = findPersonObjectArray(name);
 		var totalElementObject = $('<div>').addClass('row');
 		var tempObject = $('<div>' + this.name + '</div>');
 		tempObject.addClass('col-md-12');
@@ -971,39 +962,80 @@ var App = function() {
 		}
 	};
 
+	this.createCharacterJqueryObject = function(jqueryObject, inArray) {
+
+		for(var i=0; i < inArray.length; i++) {
+		
+			var tempPersonObject = inArray[ i ];
+			var tempName = tempPersonObject.name;
+			var pictureTag = '<img class="img-circle node-character" src="images/' + tempName + '.jpg"/>';
+			var tempJqueryCol = $('<div class="col-md-3 col-sm-3 col-xs-12 col-lg-3">');
+			tempJqueryCol.addClass('character-zone');
+			
+			var tempCircle = $(pictureTag);
+			var idUse = replaceCharacters(tempName, ' ', '-');
+			tempCircle.attr("id", idUse);
+
+			tempJqueryCol.append(tempCircle);
+			
+			var popupJqueryObject = tempPersonObject.makePopup();
+			tempJqueryCol.append(popupJqueryObject);
+			
+			jqueryObject.append(tempJqueryCol);
+
+		}
+		
+		return jqueryObject;
+	};	
+
+	this.foo2 = function(name, relationDict) {
+
+		var mainPopupJqueryObject = $('<div>');
+		mainPopupJqueryObject.addClass('popup');
+		var bodyPopupJqueryObject = $('<div>');
+		bodyPopupJqueryObject.addClass('popup-body');
+		var contentPopupJqueryObject = $('<div>');
+		contentPopupJqueryObject.addClass('popup-content');
+		var popupString = '<h2 class="popup-title">' + name + '</h2>';
+		var popupHeadingJqueryObject = $(popupString);   //don't add at end
+		contentPopupJqueryObject.append(popupHeadingJqueryObject);
+		
+		for(key in relationDict) {
+			var htmlStringObject = $('<p>' + key + ': ' + relationDict[ key ] + '</p>');
+			contentPopupJqueryObject.append(htmlStringObject);
+		}
+
+		bodyPopupJqueryObject.append(contentPopupJqueryObject);
+		mainPopupJqueryObject.append(bodyPopupJqueryObject);
+		return mainPopupJqueryObject;
+	};	
+	
+	this.findPersonObjectArray = function(bookName) {
+	
+		var outArray;
+		
+		if(bookName === 'Dune') {
+			var outArray = masterPersonObjectArray;
+		}
+		return outArray;
+	};
+	
 	this.init = function() {
 		console.log('app started');
 
 		that.linkRelationObjectArray = generateLinkRelationObjectArray();
 		var relationObjectArray = generateRelationObjectArray();
 
-		var Person1Relations = [ 'Aria Atreides:sister', 'Lady Jessica:mother', 'Leto Atreides:father', 'Leto Atreides II:son','Baron Vladimir Harkonnen:grandpa', ' Ghanima:daughter']
-
 		that.masterPersonObjectArray = makeMasterPersonArray();
 
 		var numberLinksMasterPersonObjectArrayInitial = countLinksPersonObjectArray(that.masterPersonObjectArray);
 		
-
 		cycleConnectionsMasterPersonObjectArray(that.masterPersonObjectArray);
 		
 		var numberLinksMasterPersonObjectArrayEnd = countLinksPersonObjectArray(that.masterPersonObjectArray);
 
 		console.log("Number of Links Before Cycle: " + numberLinksMasterPersonObjectArrayInitial);
 		console.log("Number of Links After Cycle: " + numberLinksMasterPersonObjectArrayEnd);
-
-
-		// var testPersonObject = masterPersonObjectArray[0];
-		// var testObjectArray = masterPersonObjectArray.slice(0, 5);
-		// testPersonObject.findSecondLevelRelationships(masterPersonObjectArray, relationObjectArray);
-
-		// var testPersonObject2 = masterPersonObjectArray[1];
-		// testPersonObject2.findSecondLevelRelationships(masterPersonObjectArray, relationObjectArray);
-
-		// var testPersonObject3 = masterPersonObjectArray[2];
-		// testPersonObject3.findSecondLevelRelationships(masterPersonObjectArray, relationObjectArray);
-
-		// var testPersonObject3 = masterPersonObjectArray[3];
-		// testPersonObject3.findSecondLevelRelationships(masterPersonObjectArray, relationObjectArray);
 
 		for(var i=0; i < masterPersonObjectArray.length; i++) {
 
@@ -1023,34 +1055,14 @@ var App = function() {
 		console.log("Number of links after pass through function has run through: " +  numberLinksMasterPersonObjectArraySecond);
 		console.log('Number of links after 2nd bi-directional cycle: ' + numberLinksMasterPersonObjectArraySecondBiDirectional);
 
-		// var Person1 = new PersonObject('Paul Atreides', 'male');
-		// Person1.relationList.push()
-		// var Person2 = new PersonObject('Aria', 'female');
-		// var Person3 = new PersonObject('Lady Jessica', 'female');
-		// var Person4 = new PersonObject('Duke Leto Atriedies', 'male');
-		// var Person5 = new PersonObject('Silgar', 'male');
-		// var Person6 = new PersonObject('Baron Vladimir Harkonen', 'male');
-		// that.masterPersonObjectArray = [Person1, Person2, Person3, Person4, Person5, Person6];
-
-
-
-
-		// var currentBookName = "Dune";
-		// var timelineRaw = MasterBookObject[currentBookName];
-		
-		// that.CurrentBookObject = new Book(currentBookName, timelineRaw);
-		// that.CurrentBookObject.renderTimeline();
-
-		// //$('#page').append(this.Dune.timeline[0].el);
-
-		// console.log(that.duneArray);
 	};
-
+		
 	$('.book-main').click(function() {
 
-		if(typeof(that.CurrentBookObject))
-		that.CurrentBookObject.clearPage();
-		that.CurrentBookObject.renderBookTitle();
+		if(typeof(that.CurrentBookObject)) {
+			that.CurrentBookObject.clearPage();
+			that.CurrentBookObject.renderBookTitle();
+		}
 
 	});
 
@@ -1067,6 +1079,7 @@ var App = function() {
 			// that.currentBook = MasterBookObject[promptIn];
 			// that.currentTimeline = 
 				var timelineRaw = MasterBookObject[inputBookName];
+				var bookPersonObjectArray = findPersonObjectArray(inputBookName);
 				that.CurrentBookObject = new Book(inputBookName, timelineRaw);
 				console.log(that.CurrentBookObject.name);
 				that.CurrentBookObject.clearPage();
@@ -1086,6 +1099,57 @@ var App = function() {
 			that.CurrentBookObject.render();
 		}
 
+	});
+
+	$('.book-character').click(function() {
+	
+		if(typeof(that.CurrentBookObject)) {
+			that.CurrentBookObject.clearPage();
+			that.CurrentBookObject.renderBookTitle();
+		}
+		
+		var tempJquery = $('<div class="row">');
+		var inArray = that.CurrentBookObject.characterObjectArray;
+		var tempJquery = createCharacterJqueryObject(tempJquery, inArray);
+	
+		$('#page').append(tempJquery);
+	});
+	
+	$(document).on('mouseenter', '.node-character', function() {
+	
+		console.log('Mouse enter event');
+		console.log('click status: ' + that.clickStatus);
+		
+		// if(that.clickStatus === false) {
+		var tempID = $(this).attr('id');
+		var tempID = replaceCharacters(tempID, '-', ' ');
+		console.log(this);
+		
+		var inArray = CurrentBookObject.characterObjectArray;
+		var foundItem = searchObjectArray(inArray, tempID, 'name');
+				
+		var popupObject = $(this).siblings('.popup');
+		popupObject.show();
+		console.log(foundItem.name);
+		console.log(foundItem.parseRelationList());		
+
+	});
+	
+	$(document).on('mouseleave', '.node-character', function() {
+	
+		console.log('click status: ' + that.clickStatus);
+		// if(that.clickStatus === false) {
+		var popupObject = $(this).siblings('.popup');
+		popupObject.hide();	
+		
+	});
+	
+	$(document).on('click', '.node-character', function() {
+
+		that.clickStatus = !(that.clickStatus);
+		var popupObject = $(this).siblings('.popup');
+		popupObject.toggle();
+		
 	});
 	
 	return {
@@ -1117,3 +1181,6 @@ $(document).on('ready', function() {
 	App.init();
   
 });
+
+
+
