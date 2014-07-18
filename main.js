@@ -100,30 +100,36 @@ var MasterBookObject = {Dune: DuneTimeline, GameThrones:GameThronesTimeline};
 var App = function() {
 
 	var that = this;
-	var femaleNextKin = ['greatAunt', 'aunt', 'cousin', 'niece', 'grandNiece'];
-	var femaleFamily = ['grandma', 'mother', 'wife', 'sister', 'daughter', 'grandDaughter'];
-	var maleFamily = ['grandpa', 'father', 'husband', 'brother', 'son', 'grandson'];
-	var maleNextKin = ['grandUncle', 'uncle', 'cousin', 'nephew', 'grandNephew'] ;
+	var femaleNextKin = ['great aunt', 'aunt', 'cousin', 'niece', 'grand niece'];
+	var femaleFamily = ['great grandma', 'grandma', 'mother', 'wife', 'sister', 'daughter', 'grand daughter'];
+	var maleFamily = ['great grandpa','grandpa', 'father', 'husband', 'brother', 'son', 'grandson'];
+	var maleNextKin = ['great uncle', 'grand uncle', 'uncle', 'cousin', 'nephew', 'grand nephew'] ;
 	var otherRelations = ['servant','enemy','concubine'];
 	var bilateralRelations = ['enemy', 'friend', 'cousin'];
 
-	var grandArray = ['greatAunt', 'grandma', 'grandpa', 'grandUncle'];
+	var greatArray = ['great aunt', 'great grandma', 'great grandpa', 'great uncle'];
+	var grandArray = ['grand aunt', 'grandma', 'grandpa', 'grand uncle'];
 	var parentArray = ['aunt', 'mother', 'father', 'uncle'];
 	var siblingArray = ['sister', 'you', 'you', 'brother'];
 	var childArray = ['niece', 'daughter', 'son', 'nephew'];
-	var grandChildArray = ['grandNiece', 'grandDaughter', 'grandson', 'grandNephew'];
+	var grandChildArray = ['grand niece', 'grand daughter', 'grandson', 'grand nephew'];
 	var randomEqualAgeArray = ['concubine', 'wife', 'husband', 'cousin', 'consort'];
 	var marriedDuo = ['wife', 'husband'];
 
 	var Person1Literal = {name:"Paul Atreides", gender:"male", relationList: [ 'Aria Atreides:sister', 'Lady Jessica:mother', 'Duke Leto Atreides:father', 'Leto Atreides II:son','Baron Vladimir Harkonnen:grandpa', 'Ghanima Atreides:daughter'] };
-	var Person2Literal = {name:'Aria Atreides', gender:'female', relationList: ['Lady Jessica:mother'] };
-	var Person3Literal = {name:'Lady Jessica', gender:'female', relationList: ['Duke Leto Atreides:husband'] };
-	var Person4Literal = {name:'Silgar', gender:'male', relationList: ['Paul Atreides:friend'] };
-	var Person5Literal = {name:'Baron Vladimir Harkonnen', gender:'male', relationList: [ 'Lady Jessica:daughter'] };
-	var Person6Literal = {name:'Leto Atreides II', gender:'male', relationList: [ 'Aria Atreides:aunt' ] };
-	var Person7Literal = {name:'Ghanima Atreides', gender:'female', relationList: [ 'Aria Atreides:aunt' ] };
-	var Person8Literal = {name:'Duke Leto Atreides', gender:'male', relationList: ['Leto Atreides II:grandson'] };
-	this.personLiteralArray = [ Person1Literal, Person2Literal, Person3Literal, Person4Literal, Person5Literal, Person6Literal, Person7Literal, Person8Literal ];
+	var Person7Literal = {name:'Ghanima Atreides', gender:'female', relationList: [ 'Aria Atreides:aunt', 'Stilgar:friend', 'Leto Atreides II:brother', 'Paul Atreides:father', 'Baron Vladimir Harkonnen:enemy'] };
+
+	var Person5Literal = {name:'Baron Vladimir Harkonnen', gender:'male', relationList: [ 'Lady Jessica:daughter', 'Stilgar:enemy', 'Duke Leto Atreides:enemy', 'Leto Atreides II:great grandson'] };
+	var Person6Literal = {name:'Leto Atreides II', gender:'male', relationList: [ 'Aria Atreides:aunt', 'Stilgar:friend', 'Baron Vladimir Harkonnen:enemy' ] };
+
+	var Person2Literal = {name:'Aria Atreides', gender:'female', relationList: ['Lady Jessica:mother', 'Stilgar:friend', 'Baron Vladimir Harkonnen:grandpa'] };
+	var Person8Literal = {name:'Duke Leto Atreides', gender:'male', relationList: ['Leto Atreides II:grandson', 'Stilgar:friend', 'Ghanima Atreides:grand daughter'] };
+
+	var Person3Literal = {name:'Lady Jessica', gender:'female', relationList: ['Duke Leto Atreides:husband', 'Stilgar:friend'] };
+	
+	var Person4Literal = {name:'Stilgar', gender:'male', relationList: ['Paul Atreides:friend'] };
+		
+		this.personLiteralArray = [ Person1Literal, Person7Literal, Person5Literal, Person6Literal, Person2Literal, Person8Literal, Person3Literal, Person4Literal  ];
 
 	var femaleMembersArray = femaleNextKin.concat(femaleFamily);
 	femaleMembersArray.push('concubine');
@@ -140,6 +146,8 @@ var App = function() {
 	var generationsArray = [grandChildArray, childArray, siblingArray, parentArray, grandArray];
 	this.relationIdenity = _.flatten(generationsArray);
 
+	this.passThroughCountTotal = 0;
+
 
 	this.PersonObject = function(inLiteralObject) {
 
@@ -148,6 +156,8 @@ var App = function() {
 		var storeList;
 		(inLiteralObject.relationList === undefined)? storeList = [] : storeList = inLiteralObject.relationList;
 		this.relationList = storeList;
+		var tempValue = this.name + ':you';
+		this.relationList.push(tempValue);
 
 		this.parseRelationList = function() {
 
@@ -163,8 +173,6 @@ var App = function() {
 				var tempName = tempString.slice(0, splitIndex);
 				var tempRelation = tempString.slice(splitIndex + 1);
 
-				console.log('i: ' + i);
-
 				this.relationConnectionDict[ tempName ] = tempRelation;
 
 			}
@@ -177,8 +185,19 @@ var App = function() {
 	var applyRelationObject = function(relationObject) {
 
 		this.parseRelationList();
-		if( !(relationObject.name in this.relationConnectionDict)) {
-			this.relationList.push(relationObject.parseString());
+
+		if( !(relationObject.relation === 'you' && relationObject.name === this.name) ) {
+
+			if( !(relationObject.name in this.relationConnectionDict) ) {
+				this.relationList.push(relationObject.parseString());
+			}
+			if( this.relationConnectionDict[ relationObject.name ] === '' && relationObject.relation !== '') {
+				var tempArrayValue = relationObject.name + ':';
+				var tempIndexValue = this.relationList.indexOf(tempArrayValue);
+				this.relationList.splice(tempIndexValue, 1);
+				// this.relationConnectionDict[]
+				this.relationList.push(relationObject.parseString());
+			}
 		}
 	};
 
@@ -193,34 +212,25 @@ var App = function() {
 
 	var findSecondLevelRelationships = function(inObjectArray, relationObjectArray) {
 
+		var passThroughCount = 0;
 		console.log('\n\n\nStart searching second level relationships');
-
 		this.parseRelationList();
-		console.log(this.relationConnectionDict);
 		var relationConnectionDictLength = this.relationConnectionDict.length;
-
-		console.log('dictionary is good');
-
 		for(name in this.relationConnectionDict) {
-
-			console.log('in the for loop, first level');
 	
 			var foundPersonObject = searchObjectArray(inObjectArray, name, 'name');
-
-			console.log(foundPersonObject);
-
 			if(foundPersonObject !== undefined) {
 
-				console.log('found object');
+				// console.log('found object');
 				var relationToYou = this.relationConnectionDict[ name ];
 
-				console.log('Name: ' + name);
-				console.log('Relation: ' + relationToYou);
+				// console.log('Name: ' + name);
+				// console.log('Relation: ' + relationToYou);
 
 				var foundPersonObjectConnectionDict = foundPersonObject.parseRelationList();
 
 				
-				console.log('Relationship Dictionary: ' + foundPersonObjectConnectionDict);
+				// console.log('Relationship Dictionary: ' + foundPersonObjectConnectionDict);
 
 				for(nameFoundPerson in foundPersonObjectConnectionDict) {
 
@@ -230,12 +240,14 @@ var App = function() {
 
 					if(resultRelation !== undefined) {
 						this.createRelationObjectPairMethod(resultRelation.relation, nameFoundPerson);
+						passThroughCount += 1;
 						console.log('\nfound pass through relationship, fuck yeah!');
-						console.log(nameFoundPerson + ' : ' + resultRelation);
+						//console.log(nameFoundPerson + ' : ' + resultRelation);
 					}
 				}
 			}
 		}
+		passThroughCountTotal += passThroughCount;
 	};
 	
 	PersonObject.prototype.findSecondLevelRelationships = findSecondLevelRelationships;
@@ -398,17 +410,13 @@ var App = function() {
 	};
 
 	this.copyRelationObject = function(inObject) {
-		console.log('copying relational object');
-		console.log(inObject);
 
 		if(inObject === undefined) {
 			var result = new RelationObject('');
 		}
 		else {
-			console.log('relational object being copied is not undefined');
 			var tempRelationObject = new RelationObject('');
 			var result = $.extend( tempRelationObject, inObject);
-			console.log(inObject);
 			inObject.name = '';
 		}
 		return result;
@@ -418,15 +426,11 @@ var App = function() {
 		var tempRelationObject = new PersonObject(inPersonObject);
 		tempRelationObject.relationList = inPersonObject.relationList;
 		var result = $.extend( tempRelationObject, inPersonObject);
-		console.log(inPersonObject);
 		return result;
 	};
 
 
 	this.relationFinder = function(gender, key) {
-
-		console.log('gender: ' + gender);
-		console.log('key: ' + key);
 
 		if(gender === 'male' && key === 'wife') {
 			return 'husband';
@@ -434,8 +438,6 @@ var App = function() {
 		if(gender === 'female' && key === 'husband') {
 			return 'wife';
 		}
-
-		console.log('gender: ' + gender);
 
 		if(bilateralRelations.indexOf(key) > -1) { 
 			var newDistancePosition = bilateralRelations.indexOf(key);
@@ -471,8 +473,6 @@ var App = function() {
 				// console.log(lateralIndex);
 			}
 
-			console.log('newDistancePosition: ' + newDistancePosition);
-
 			if(newDistancePosition > -1) {
 				var relationResult = locationArray[ newDistancePosition ];
 				// console.log('locationArray: ');
@@ -503,9 +503,9 @@ var App = function() {
 		// var tempString = relationIdenity[ i ];						
 		var genderRelation = findGender(tempString);
 		var relationIdTemp = relationFinder(gender, tempString);
-		console.log('relation: ' + tempString);
-		console.log('gender: ' + gender);
-		console.log('relation to you: ' + relationIdTemp);
+		// console.log('relation: ' + tempString);
+		// console.log('gender: ' + gender);
+		// console.log('relation to you: ' + relationIdTemp);
 		
 		relationObjectArray = generateRelationObjectArray();
 
@@ -514,8 +514,8 @@ var App = function() {
 		tempObject.name = tempStringName;
 		relationIdObject.name = name;
 		
-		console.log('relation object: ' + tempObject.relation);
-		console.log('relation object to you: ' + relationIdObject.relation);
+		// console.log('relation object: ' + tempObject.relation);
+		// console.log('relation object to you: ' + relationIdObject.relation);
 		
 		return [tempObject, relationIdObject];
 				
@@ -523,15 +523,15 @@ var App = function() {
 
 	this.createRelationObjectPairMethod = function(tempString, tempStringName) {
 
-		console.log('createRelationObjectPairMethod has fired');
-		console.log('tempString: ' + tempString);
-		console.log('tempStringName: ' + tempStringName);
+		// console.log('createRelationObjectPairMethod has fired');
+		// console.log('tempString: ' + tempString);
+		// console.log('tempStringName: ' + tempStringName);
 		var relationTuple = createRelationObjectPair(tempString, tempStringName, this.name, this.gender);
-		console.log(relationTuple);
+		// console.log(relationTuple);
 		var relationStoredObject = relationTuple[ 0 ];
 		var relationSentObject = relationTuple[ 1 ];
-		console.log('relationStoredObject: ' + relationStoredObject);
-		console.log('relationSentObject' + relationSentObject);
+		// console.log('relationStoredObject: ' + relationStoredObject);
+		// console.log('relationSentObject' + relationSentObject);
 		var relationStoreString = relationStoredObject.parseString();
 
 		this.applyRelationObject(relationStoredObject);
@@ -539,11 +539,15 @@ var App = function() {
 		//this.relationList.push(relationStoreString);
 		var nameSentObject = relationStoredObject.name;
 
-		console.log('Name of Sent object: ' + nameSentObject);
+		// console.log('Name of Sent object: ' + nameSentObject);
 
 		var foundPersonObject = searchObjectArray(masterPersonObjectArray, nameSentObject, 'name');
-		console.log(foundPersonObject);
-		foundPersonObject.applyRelationObject(relationSentObject);
+
+		//console.log(foundPersonObject);
+
+		if(foundPersonObject !== undefined) {
+			foundPersonObject.applyRelationObject(relationSentObject);
+		}
 
 	};
 
@@ -555,10 +559,7 @@ var App = function() {
 		
 		for(var i=0; i < relationIdenity.length; i++) {
 		
-			var tempString = relationIdenity[ i ];
-			
-			console.log('\nrelation number: ' + i);
-			
+			var tempString = relationIdenity[ i ];			
 			var relationTuple = createRelationObjectPair(tempString, '', '', findGender(tempString));
 			outputArray.push(relationTuple);
 		}
@@ -576,21 +577,17 @@ var App = function() {
 	};
 
 	this.generateRelationships = function() {
-		console.log('generate relationships fired');
-		console.log('this.relationList.length: ' + this.relationList.length);
-		console.log('genertion started: ' + this.name);
+		// console.log('generate relationships fired');
+		// console.log('this.relationList.length: ' + this.relationList.length);
+		// console.log('genertion started: ' + this.name);
 		var arrayEnd = this.relationList.length;
 		for(var i=0; i < arrayEnd; i++) {
-			console.log("i: " + i);
+			
 			var tempRelationString = this.relationList[ i ];
-			console.log('tempRelationString: ' + tempRelationString);
+			//console.log('tempRelationString: ' + tempRelationString);
 			var relationTuple = turnRelationStringTuple(tempRelationString);
-			console.log(relationTuple);
 			this.createRelationObjectPairMethod(relationTuple[1], relationTuple[0]);
-			//alert('link found');
 		}
-		console.log('genertion finished');
-
 	};
 
 	PersonObject.prototype.generateRelationships = generateRelationships;
@@ -663,9 +660,6 @@ var App = function() {
 		
 		var yTarget = firstLevelYDistance + secondLevelYDistance;
 		var xTarget = firstLevelXDistance + secondLevelXDistance;
-		
-		console.log('genderStart: ' + genderStart);
-		console.log('genderTarget: ' + genderTarget);
 
 		return relationObjectTransformGrid(relationObjectArray, xTarget, yTarget, genderStart, genderTarget, secondLevelRelation);
 
@@ -699,6 +693,8 @@ var App = function() {
 
 	this.relationObjectTransformGrid = function(relationObjectArray, xValue, yValue, genderStart, genderTarget, targetRelation) {
 
+		//console.log('genderStart: ' + genderStart);
+
 		if(2 >= Math.abs(xValue) && 2 >= Math.abs(yValue)) {
 
 			if(Math.abs(xValue) !== xValue) {
@@ -723,12 +719,32 @@ var App = function() {
 			
 		
 			var foundObject = searchGridPositionObjectArray(relationObjectArray, xTarget, yValue);
-					
+
 			if(foundObject === null) {
 				foundObject = {};
 				console.log('this might be the break point'); 
 			}
 			else {
+
+				if( (foundObject.relation === 'grandma' || foundObject.relation === 'grandpa') && (targetRelation === 'father' || targetRelation === 'mother') ) {
+
+					var foundObjectRelation = foundObject.relation;
+					
+					if(genderStart === 'female') {
+
+						var relationValue = 'great grand daughter';
+						var foundObject = new RelationObject(relationValue);
+					}
+					if(genderStart === 'male') {
+						var relationValue = 'great grand son';
+						var foundObject = new RelationObject(relationValue);
+					}
+
+					console.log('\n\ngreat part has fired');
+					console.log('genderStart: ' + genderStart + '\ngenderTarget: ' + genderTarget + '\ntargetRelation: ' + targetRelation + '\nBase Object: ' + foundObjectRelation + '\nNew Object: ' + foundObject.relation);
+
+				}
+					
 					
 				if( (foundObject.relation === 'brother' || foundObject.relation === 'sister') && (targetRelation === 'nephew' || targetRelation === 'niece' || targetRelation === 'son' || targetRelation === 'daughter') ) {
 					var relationValue = 'cousin';
@@ -738,6 +754,18 @@ var App = function() {
 				
 				if( ( targetRelation === 'aunt' || targetRelation === 'uncle' || targetRelation === 'niece' || targetRelation === 'nephew') && (yValue === 0) ) {
 					var relationValue = 'sibling';
+					var foundObject = new RelationObject(relationValue);
+				}
+
+				if(targetRelation === 'friend' && foundObject.relation === 'friend') {
+					var relationValue = 'friend';
+					var foundObject = new RelationObject(relationValue);
+				}
+				if( (targetRelation === 'friend' && foundObject.relation !== 'friend') || (targetRelation !== 'friend' && foundObject.relation === 'friend') ) {
+					var foundObject = {};
+				}
+				if(foundObject.relation === 'enemy' && targetRelation === 'enemy') {
+					var relationValue = 'friend';
 					var foundObject = new RelationObject(relationValue);
 				}
 			}
@@ -754,24 +782,14 @@ var App = function() {
 	this.returnPassThroughRelationObject = function(relationObjectArray, intermediateRelation, targetRelation) {
 
 		var key = 'relation';
-		console.log('returnPassThroughRelationObject has fired');
 
 		var intermediateRelationObject = _.filter(relationObjectArray, function(obj) {return obj[key] === intermediateRelation});
 		var intermediateRelationObject = intermediateRelationObject[0];
 		var targetRelationObject = _.filter(relationObjectArray, function(obj) {return obj[key] === targetRelation});
 		var targetRelationObject = targetRelationObject[0];
-		
-		console.log(intermediateRelationObject);
-		console.log(targetRelationObject);
-		
-		// var intermediateRelationObject = $.grep(relationObjectArray, function(el) {return el[key] === intermediateRelation} );
-		// var targetRelationObject = $.grep(relationObjectArray, function(el) {return el[key] === targetRelation} );
-		
+				
 		if(intermediateRelationObject !== undefined && targetRelationObject !== undefined) {
-
-			console.log(intermediateRelationObject.relation);
-			console.log(targetRelationObject.relation);
-			
+		
 			var intermediateRelationObject = copyRelationObject(intermediateRelationObject);
 			var targetRelationObject = copyRelationObject(targetRelationObject);
 
@@ -974,21 +992,36 @@ var App = function() {
 		console.log("Number of Links After Cycle: " + numberLinksMasterPersonObjectArrayEnd);
 
 
-		var testPersonObject = masterPersonObjectArray[0];
-		var testObjectArray = masterPersonObjectArray.slice(0, 5);
-		testPersonObject.findSecondLevelRelationships(masterPersonObjectArray, relationObjectArray);
+		// var testPersonObject = masterPersonObjectArray[0];
+		// var testObjectArray = masterPersonObjectArray.slice(0, 5);
+		// testPersonObject.findSecondLevelRelationships(masterPersonObjectArray, relationObjectArray);
 
-		var testPersonObject2 = masterPersonObjectArray[1];
-		testPersonObject2.findSecondLevelRelationships(masterPersonObjectArray, relationObjectArray);
+		// var testPersonObject2 = masterPersonObjectArray[1];
+		// testPersonObject2.findSecondLevelRelationships(masterPersonObjectArray, relationObjectArray);
+
+		// var testPersonObject3 = masterPersonObjectArray[2];
+		// testPersonObject3.findSecondLevelRelationships(masterPersonObjectArray, relationObjectArray);
+
+		// var testPersonObject3 = masterPersonObjectArray[3];
+		// testPersonObject3.findSecondLevelRelationships(masterPersonObjectArray, relationObjectArray);
+
+		for(var i=0; i < masterPersonObjectArray.length; i++) {
+
+			var tempPersonObject = masterPersonObjectArray[ i ];
+			tempPersonObject.findSecondLevelRelationships(masterPersonObjectArray, relationObjectArray);
+		}
+		console.log('passThroughCountTotal: ' + passThroughCountTotal);
 
 		var numberLinksMasterPersonObjectArraySecond = countLinksPersonObjectArray(that.masterPersonObjectArray);
 
+		cycleConnectionsMasterPersonObjectArray(that.masterPersonObjectArray);
+
+		var numberLinksMasterPersonObjectArraySecondBiDirectional = countLinksPersonObjectArray(that.masterPersonObjectArray);
+
 		console.log("Number of Links Before Cycle: " + numberLinksMasterPersonObjectArrayInitial);
 		console.log("Number of Links After Cycle: " + numberLinksMasterPersonObjectArrayEnd);
-
 		console.log("Number of links after pass through function has run through: " +  numberLinksMasterPersonObjectArraySecond);
-
-
+		console.log('Number of links after 2nd bi-directional cycle: ' + numberLinksMasterPersonObjectArraySecondBiDirectional);
 
 		// var Person1 = new PersonObject('Paul Atreides', 'male');
 		// Person1.relationList.push()
